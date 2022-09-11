@@ -1,5 +1,5 @@
 class Vehicle < ApplicationRecord
   #Associations
-  has_one :driver_service
+  has_one :service
   belongs_to :user
 end

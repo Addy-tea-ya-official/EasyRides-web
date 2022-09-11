@@ -10,4 +10,5 @@ class User < ActiveRecord::Base
 
   #Associations
   has_many :vehicles
+  has_one :service_ticket
 end
