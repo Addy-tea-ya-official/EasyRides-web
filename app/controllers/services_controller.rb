@@ -16,7 +16,8 @@ class ServicesController < ApplicationController
           },
           destination: service.destination,
           current_capacity: service.current_capacity,
-          fair: service.fair
+          fair: service.fair,
+          service_id: service.id
         }
       )
     end 
