@@ -10,13 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_09_11_045845) do
+ActiveRecord::Schema.define(version: 2022_09_11_053445) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "services", force: :cascade do |t|
-    t.bigint "driver_id"
     t.bigint "vehicle_id"
     t.string "destination", null: false
     t.integer "current_capacity", null: false
@@ -24,7 +23,6 @@ ActiveRecord::Schema.define(version: 2022_09_11_045845) do
     t.time "boarding_time"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["driver_id"], name: "index_services_on_driver_id"
     t.index ["vehicle_id"], name: "index_services_on_vehicle_id"
   end
 
@@ -61,7 +59,6 @@ ActiveRecord::Schema.define(version: 2022_09_11_045845) do
     t.index ["user_id"], name: "index_vehicles_on_user_id"
   end
 
-  add_foreign_key "services", "users", column: "driver_id"
   add_foreign_key "services", "vehicles"
   add_foreign_key "vehicles", "users"
 end
