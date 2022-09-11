@@ -29,7 +29,7 @@ class ServicesController < ApplicationController
     ticket = ServiceTicket.new(
       {
         service_id: service.id,
-        passenger_id: 1
+        passenger_id: user.id
       }
     )
     if ticket.save
@@ -55,7 +55,7 @@ class ServicesController < ApplicationController
       {
         vehicle_id: service_params[:vehicle_id],
         destination: service_params[:destination],
-        current_capacity: service_params[:current_capacity],
+        current_capacity: Vehicle.find(service_params[:vehicle_id]).capacity - 1,
         fair: service_params[:fair],
         boarding_time: service_params[:boarding_time]
       }
@@ -69,6 +69,6 @@ class ServicesController < ApplicationController
 
   private
     def service_params
-      params.require(:service).permit(:vehicle_id, :destination, :current_capacity, :fair, :boarding_time)
+      params.require(:service).permit(:vehicle_id, :destination, :fair, :boarding_time)
     end
 end
