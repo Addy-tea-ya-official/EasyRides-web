@@ -6,5 +6,6 @@ Rails.application.routes.draw do
   get '/services/:id', to: 'services#show' 
   get '/requests', to: 'drivers#index'
   patch '/requests/:id', to: 'drivers#update'
+  get '/ticket', to: 'passengers#index'
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
 end
