@@ -20,23 +20,28 @@ class DriversController < ApplicationController
     render json: requests, status: 200 
   end
 
-  def update
+  def update_request_status
     user = get_user
-    request = ServiceTicket.find(params[:id])
-    service = Service.find(request.service_id)
-    if(Vehicle.find(service.vehicle_id).user_id != user.id)
-      render json: {message: "No requests found"}, status: 400
+    begin
+      request = ServiceTicket.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      render json: {message: "Service Ticket not found"}, status: 400
     else
-      if get_request_status[:request_status]
-        if(service.current_capacity > 0)
-          service.current_capacity -= 1
-          service.save!
+      service = Service.find(request.service_id)
+      if(Vehicle.find(service.vehicle_id).user_id != user.id)
+        render json: {message: "No requests found"}, status: 400
+      else
+        if get_request_status[:request_status]
+          if(service.current_capacity > 0)
+            service.current_capacity -= 1
+            service.save!
+            request.update!(get_request_status)
+          end
+        else
           request.update!(get_request_status)
         end
-      else
-        request.update!(get_request_status)
+        render json: request, status: 200
       end
-      render json: request, status: 200
     end
   end
 
