@@ -52,7 +52,7 @@ class ServicesController < ApplicationController
     driver: {
       name: user.name
     },
-    vehicles: Vehicle.select(:id ,:registeration_number).where(user_id: user.id)
+    vehicles: Vehicle.select(:id, :registeration_number).where(user_id: user.id)
     }, status: 200
   end
 
