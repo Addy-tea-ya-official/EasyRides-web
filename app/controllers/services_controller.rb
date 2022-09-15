@@ -2,23 +2,27 @@ class ServicesController < ApplicationController
   before_action :authenticate_user!
 
   def index
-    services = Service.where.not(current_capacity: 0)
+    services = Service.where.not(current_capacity: 0).where('services.boarding_time > ?', DateTime.now)
     services_list = []
     services.each do |service|
       vehicle = Vehicle.find(service.vehicle_id)
       services_list.push(
         {
-          driver: {
-            name: User.find(vehicle.user_id).name
-          },
-          vehicle: { 
-            name: vehicle.name
-          },
-          destination: service.destination,
-          current_capacity: service.current_capacity,
-          fair: service.fair,
-          boarding_time: service.boarding_time,
-          service_id: service.id
+          message: "Available ride services",
+          data:
+          {
+            driver: {
+              name: User.find(vehicle.user_id).name
+            },
+            vehicle: { 
+              name: vehicle.name
+            },
+            destination: service.destination,
+            current_capacity: service.current_capacity,
+            fair: service.fair,
+            boarding_time: service.boarding_time,
+            service_id: service.id
+          }
         }
       )
     end 
@@ -30,7 +34,7 @@ class ServicesController < ApplicationController
     begin
       service = Service.find(params[:id])
     rescue ActiveRecord::RecordNotFound
-      render json: {message: "Service does not exist"}, status: 204
+      render json: {error: "Service does not exist"}, status: 204
     else 
       ticket = ServiceTicket.new(
         {
@@ -39,9 +43,15 @@ class ServicesController < ApplicationController
         }
       )
       if ticket.save
-        render json: ticket, status: 200  
+        render json: {
+          message: "Ticket saved successfully",
+          data: {
+            service_id: ticket.service_id, 
+            passenger_id: ticket.passenger_id
+          }
+        }, status: 200  
       else
-        render json: {message: "Ride not booked"}, status: :unprocessable_entity
+        render json: {error: "Ride not booked"}, status: :unprocessable_entity
       end
     end
   end
@@ -49,10 +59,13 @@ class ServicesController < ApplicationController
   def new
     user = get_user
     render json:{
-    driver: {
-      name: user.name
-    },
-    vehicles: Vehicle.select(:id, :registeration_number).where(user_id: user.id)
+      message: "Driver details",
+      data:{
+        driver: {
+          name: user.name
+        },
+        vehicles: Vehicle.select(:id, :registeration_number).where(user_id: user.id)
+      }
     }, status: 200
   end
 
@@ -60,7 +73,7 @@ class ServicesController < ApplicationController
     user = get_user 
     vehicle = Vehicle.where(user_id: user.id, id: service_params[:vehicle_id])
     if vehicle.empty?
-      render json: {message: "User does not have vehicle"}, status: 400
+      render json: {error: "User does not have vehicle"}, status: 400
     else
       service = Service.new(
         {
@@ -72,9 +85,18 @@ class ServicesController < ApplicationController
         }
       )
       if service.save
-        render json: service, status: 200 
+        render json: {
+          message: "Service created",
+          data:{
+          vehicle_id: service.vehicle_id, 
+          destination: service.destination, 
+          current_capacity: service.current_capacity, 
+          fair: service.fair, 
+          boarding_time: service.boarding_time.strftime('%Y-%m-%d %H:%M:%S')
+          }
+        }, status: 200 
       else
-        render json: {message: "Service not created"}, status: :unprocessable_entity
+        render json: {error: "Service not created"}, status: :unprocessable_entity
       end
     end
   end
