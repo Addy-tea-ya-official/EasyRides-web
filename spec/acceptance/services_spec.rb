@@ -37,29 +37,7 @@ resource "Services" do
     end
   end
 
-  get "/services/:id" do
-    context '200' do
-      let(:id) { service.id }
-      before do 
-        auth_headers = passenger.create_new_auth_token
-        header "Authorization", auth_headers["Authorization"]
-      end
-      example "Passenger Booking ride" do
-        expected_response = {
-          message: "Ticket saved successfully",
-          data:{
-          service_id: service.id,
-          passenger_id: passenger.id
-          }
-        }.to_json
-        do_request
-        expect(status).to eq 200
-        expect(response_body).to eq(expected_response)
-      end
-    end
-  end
-
-  get "/services/new" do
+  get "/service/new" do
     context '200' do
       before do 
         auth_headers = driver.create_new_auth_token
@@ -82,7 +60,7 @@ resource "Services" do
     end
   end
 
-  post "/services" do
+  post "/service" do
     parameter :vehicle_id, "Ride vehicle", required: true
     parameter :destination, "Ride destination"
     parameter :fair, "Ride fair"
