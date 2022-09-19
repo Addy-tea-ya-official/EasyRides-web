@@ -8,9 +8,8 @@ class ServicesController < ApplicationController
       vehicle = Vehicle.find(service.vehicle_id)
       services_list.push(
         {
-          message: "Available ride services",
-          data:
-          {
+          message: "Ride details",
+          data:{
             driver: {
               name: User.find(vehicle.user_id).name
             },
@@ -27,33 +26,6 @@ class ServicesController < ApplicationController
       )
     end 
     render json: services_list, status: 200
-  end
-
-  def book_ride
-    user = get_user
-    begin
-      service = Service.find(params[:id])
-    rescue ActiveRecord::RecordNotFound
-      render json: {error: "Service does not exist"}, status: 204
-    else 
-      ticket = ServiceTicket.new(
-        {
-          service_id: service.id,
-          passenger_id: user.id
-        }
-      )
-      if ticket.save
-        render json: {
-          message: "Ticket saved successfully",
-          data: {
-            service_id: ticket.service_id, 
-            passenger_id: ticket.passenger_id
-          }
-        }, status: 200  
-      else
-        render json: {error: "Ride not booked"}, status: :unprocessable_entity
-      end
-    end
   end
 
   def new
@@ -88,15 +60,15 @@ class ServicesController < ApplicationController
         render json: {
           message: "Service created",
           data:{
-          vehicle_id: service.vehicle_id, 
-          destination: service.destination, 
-          current_capacity: service.current_capacity, 
-          fair: service.fair, 
-          boarding_time: service.boarding_time.strftime('%Y-%m-%d %H:%M:%S')
+            vehicle_id: service.vehicle_id, 
+            destination: service.destination, 
+            current_capacity: service.current_capacity, 
+            fair: service.fair, 
+            boarding_time: service.boarding_time.strftime('%Y-%m-%d %H:%M:%S')
           }
         }, status: 200 
       else
-        render json: {error: "Service not created"}, status: :unprocessable_entity
+        render json: {error: "Service not created"}, status: 422
       end
     end
   end
