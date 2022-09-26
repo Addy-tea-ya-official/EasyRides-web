@@ -4,24 +4,12 @@ class DriversController < ApplicationController
   def index
     user = get_user
     requests = []
-    vehicles = Vehicle.where(user_id: user.id)
-    request_available_offset_time = DateTime.now - 3600
-    driver_requests = ServiceTicket.where(service_id: Service.where(vehicle_id: vehicles).where('services.boarding_time > ?', request_available_offset_time))
-    driver_requests.each do |request|
-      requests.push(
-        {
-          message: "Requests to driver",
-          data:{
-            passenger_name: User.find(request.passenger_id).name,
-            passenger_email: User.find(request.passenger_id).email,
-            vehicle_registeration_number: Vehicle.find(Service.find(request.service_id).vehicle_id).registeration_number,
-            request_status: request.request_status,
-            request_id: request.id
-          }
-        }
-      )
-    end
-    render json: requests, status: 200 
+    request_available_offset_time = DateTime.now - 1
+    driver_requests = ServiceTicket.select(:id ,:vehicle_name, :vehicle_registeration_number, :passenger_name, :passenger_email, :boarding_time, :request_status).where(driver_id: user.id).where('service_tickets.boarding_time > ?', request_available_offset_time)
+    render json: {
+      message: "Requests to driver",
+      driver_requests: driver_requests
+    }, status: 200 
   end
 
   def update_request_status
@@ -32,7 +20,7 @@ class DriversController < ApplicationController
       render json: {error: "Service Ticket not found"}, status: 400
     else
       service = Service.find(request.service_id)
-      if(Vehicle.find(service.vehicle_id).user_id != user.id)
+      if(request.driver_id != user.id)
         render json: {error: "Access forbidden"}, status: 401
       else
         if get_request_status[:request_status]
