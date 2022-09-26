@@ -5,16 +5,15 @@ class ServicesController < ApplicationController
     services = Service.where.not(current_capacity: 0).where('services.boarding_time > ?', DateTime.now)
     services_list = []
     services.each do |service|
-      vehicle = Vehicle.find(service.vehicle_id)
       services_list.push(
         {
           message: "Ride details",
           data:{
             driver: {
-              name: User.find(vehicle.user_id).name
+              name: service.driver_name
             },
             vehicle: { 
-              name: vehicle.name
+              name: service.vehicle_name
             },
             destination: service.destination,
             current_capacity: service.current_capacity,
@@ -43,15 +42,18 @@ class ServicesController < ApplicationController
 
   def create
     user = get_user 
-    vehicle = Vehicle.where(user_id: user.id, id: service_params[:vehicle_id])
-    if vehicle.empty?
+    vehicle = Vehicle.where(user_id: user.id).where(id: service_params[:vehicle_id]).last
+    if vehicle.nil?
       render json: {error: "User does not have vehicle"}, status: 400
     else
       service = Service.new(
         {
-          vehicle_id: service_params[:vehicle_id],
+          vehicle_name: vehicle.name,
+          vehicle_registeration_number: vehicle.registeration_number,
+          driver_name: vehicle.driver_name,
+          vehicle_id: vehicle.id,
           destination: service_params[:destination],
-          current_capacity: vehicle[0].capacity - 1,
+          current_capacity: vehicle.capacity - 1,
           fair: service_params[:fair],
           boarding_time: service_params[:boarding_time]
         }
@@ -68,10 +70,13 @@ class ServicesController < ApplicationController
           }
         }, status: 200 
       else
-        render json: {error: "Service not created"}, status: 422
+        render json: {
+          error: "Service not created"
+          }, status: :unprocessable_entity
       end
     end
   end
+
   private
     def service_params
       params.require(:service).permit(:vehicle_id, :destination, :fair, :boarding_time)
