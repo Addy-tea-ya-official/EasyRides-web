@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_09_14_124236) do
+ActiveRecord::Schema.define(version: 2022_09_20_103834) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -21,6 +21,14 @@ ActiveRecord::Schema.define(version: 2022_09_14_124236) do
     t.boolean "request_status", default: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "driver_name", default: "-"
+    t.string "vehicle_name", default: "-"
+    t.string "vehicle_registeration_number", default: "-"
+    t.string "passenger_name", default: "-"
+    t.string "passenger_email", default: "-"
+    t.datetime "boarding_time"
+    t.bigint "driver_id"
+    t.index ["driver_id"], name: "index_service_tickets_on_driver_id"
     t.index ["passenger_id"], name: "index_service_tickets_on_passenger_id"
     t.index ["service_id"], name: "index_service_tickets_on_service_id"
   end
@@ -33,6 +41,9 @@ ActiveRecord::Schema.define(version: 2022_09_14_124236) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.datetime "boarding_time"
+    t.string "driver_name", default: "-"
+    t.string "vehicle_name", default: "-"
+    t.string "vehicle_registeration_number", default: "-"
     t.index ["vehicle_id"], name: "index_services_on_vehicle_id"
   end
 
@@ -66,10 +77,12 @@ ActiveRecord::Schema.define(version: 2022_09_14_124236) do
     t.bigint "user_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "driver_name", default: "-"
     t.index ["user_id"], name: "index_vehicles_on_user_id"
   end
 
   add_foreign_key "service_tickets", "services"
+  add_foreign_key "service_tickets", "users", column: "driver_id"
   add_foreign_key "service_tickets", "users", column: "passenger_id"
   add_foreign_key "services", "vehicles"
   add_foreign_key "vehicles", "users"
