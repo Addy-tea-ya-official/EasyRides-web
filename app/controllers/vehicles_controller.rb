@@ -2,26 +2,24 @@ class VehiclesController < ApplicationController
   before_action :authenticate_user!
   def index
     user = get_user
-    vehicles = Vehicle.where(user_id: user.id)
-    vehicles_list = []
-    vehicles.each do |vehicle|
-      vehicles_list.push(
-        {
-          message: "Vehicle details",
-          data:{
-            vehicle_name: vehicle.name,
-            registeration_number: vehicle.registeration_number
-          }
-        }
-      )
+    vehicles = Vehicle.select(:id, :name, :registeration_number).where(user_id: user.id)
+    if vehicles.present?
+      render json:{
+        message: "Vehicle details",
+        vehicles: vehicles
+      }
+    else
+      return render json: {
+        error: "User does not have any vehicle"
+      }, status: 204
     end
-    render json: vehicles_list, status: 200   
   end
 
   def create_vehicle
     user = get_user
     vehicle = Vehicle.new(
       {
+        driver_name: user.name,
         name: vehicle_params[:vehicle_name],
         registeration_number: vehicle_params[:vehicle_registeration_number],
         capacity: vehicle_params[:vehicle_capacity],
